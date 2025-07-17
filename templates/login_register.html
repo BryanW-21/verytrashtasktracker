@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login & Register</title>
+    <link rel="stylesheet" href="../static/css/auth_styles.css" />
+  </head>
+  <body class="auth-page">
+    <a href="{{ url_for('home_render') }}" class="back-button"
+      >← Back to Home</a
+    >
+    <div class="auth-container">
+      <div class="auth-box">
+        <h2 id="form-title">Login</h2>
+        <form id="authForm">
+          <label for="email">Email:</label>
+          <input type="email" id="email" required />
+
+          <label for="password">Password:</label>
+          <input type="password" id="password" required />
+
+          <div id="register-fields" class="hidden">
+            <label for="username">Username:</label>
+            <input type="text" id="username" />
+          </div>
+
+          <button type="submit" class="cta primary" id="authButton">
+            Login
+          </button>
+          <p id="auth-error" class="error-message"></p>
+        </form>
+        <p class="toggle-text">
+          Don't have an account? <a href="#" id="toggleAuth">Register</a>
+        </p>
+      </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/auth.js') }}" defer></script>
+  </body>
+</html>

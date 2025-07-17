@@ -39,9 +39,11 @@ img {
   z-index: 1000;
 }
 
+/* Navbar Links */
 .nav-links {
   list-style: none;
   display: flex;
+  align-items: center;
   gap: 20px;
 }
 
@@ -55,6 +57,21 @@ img {
 
 .nav-links a:hover {
   background-color: #f1f1f1;
+}
+
+/* Styling the Login Button Separately */
+#login-btn {
+  padding: 10px 16px; /* Slightly larger padding for a button feel */
+  border-radius: 5px;
+  background-color: #2f80ed; /* Primary brand color */
+  color: #ffffff !important;
+  font-weight: 600;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease;
+}
+
+#login-btn:hover {
+  background-color: #2467c9;
+  transform: translateY(-2px);
 }
 
 /* Hero Section */
@@ -84,13 +101,14 @@ img {
 
 .cta {
   display: inline-block;
-  padding: 12px 24px;
+  padding: 14px 28px;
   margin: 10px;
   text-decoration: none;
-  border-radius: 5px;
+  border-radius: 8px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 18px;
   transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .cta.primary {
@@ -106,7 +124,7 @@ img {
 
 .cta:hover {
   transform: translateY(-3px);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 
 /* Features Section */
@@ -286,6 +304,141 @@ footer {
   color: #6b6c70;
 }
 
+/* Authentication Page Styles */
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f7fa;
+}
+
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.auth-box {
+  background: #fff;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 350px;
+}
+
+.auth-box h2 {
+  margin-bottom: 20px;
+  color: #2f80ed;
+}
+
+.auth-box input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.auth-box button {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  background-color: #2f80ed;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.auth-box button:hover {
+  background-color: #2467c9;
+}
+
+.toggle-text {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.toggle-text a {
+  color: #2f80ed;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.toggle-text a:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Modal Background */
+.modal {
+  display: none; /* Initially hidden */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+/* Modal Content */
+.modal-content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  width: 350px;
+  text-align: center;
+  position: relative;
+}
+
+/* Close Button */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Input Fields */
+.modal-content input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* Error Message */
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* Show the Modal */
+.show {
+  display: flex;
+}
+
 /* Animations */
 @keyframes fadeInUp {
   from {
@@ -312,15 +465,61 @@ footer {
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    position: fixed;
+    width: 100%;
+  }
+
+  .menu-toggle {
+    display: block;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #2f80ed;
+    padding: 20px;
   }
 
   .nav-links {
+    display: none;
     flex-direction: column;
-    align-items: center;
+    position: fixed;
+    top: 60px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    min-width: 180px;
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+
+  .nav-links a {
+    display: block;
+    padding: 12px;
+    text-align: left;
+    color: #2f80ed;
+    font-weight: 500;
+    border-radius: 5px;
+  }
+
+  .nav-links a:hover {
+    background-color: #eef3f9;
   }
 
   .features-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 769px) {
+  .menu-toggle {
+    display: none;
   }
 }

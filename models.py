@@ -1,50 +1,108 @@
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import text
+from extensions import db
 
-db = SQLAlchemy()
+def create_tables():
+    users_table_sql = text("""
+        CREATE TABLE IF NOT EXISTS users (
+            userId INT AUTO_INCREMENT PRIMARY KEY,
+            username VARCHAR(50) UNIQUE NOT NULL,
+            email VARCHAR(100) UNIQUE NOT NULL,
+            password_hash VARCHAR(255) NOT NULL
+        )ENGINE=InnoDB;
+    """)
 
-class User(db.Model):
+    tasks_table_sql = text("""
+        CREATE TABLE IF NOT EXISTS tasks (
+            taskId INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            description TEXT NOT NULL,
+            points INT NOT NULL,
+            image_url VARCHAR(255) DEFAULT '',
+            user_id INT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(userId) ON DELETE CASCADE
+        )ENGINE=InnoDB;
+    """)
 
-    userId = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    task_progress_table_sql = text("""
+        CREATE TABLE IF NOT EXISTS task_progress (
+            progressId INT AUTO_INCREMENT PRIMARY KEY,
+            taskId INT NOT NULL,
+            userId INT NOT NULL,
+            status VARCHAR(50) NOT NULL,
+            FOREIGN KEY (taskId) REFERENCES tasks(taskId) ON DELETE CASCADE,
+            FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+        )ENGINE=InnoDB;
+    """)
 
-    tasks = db.relationship("Task", backref="user", lazy=True)
+    with db.engine.begin() as connection:
+        connection.execute(users_table_sql)
+        connection.execute(tasks_table_sql)
+        connection.execute(task_progress_table_sql)
 
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+def initialize_database():
+    create_tables()
 
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+# User Functions
+def create_user(username, email, password_hash):
+    sql = text("""
+        INSERT INTO users (username, email, password_hash) VALUES (:username, :email, :password_hash)
+    """)
+    db.session.execute(sql, {"username": username, "email": email, "password_hash": password_hash})
+    db.session.commit()
 
-    def __repr__(self):
-        return f"<User {self.username}>"
+def get_user_by_email(email):
+    sql = text("SELECT * FROM users WHERE email = :email")
+    result = db.session.execute(sql, {"email": email}).fetchone()
+    return result
 
+# Task Functions
+def create_task(name, description, points, image_url, user_id):
+    sql = text("""
+        INSERT INTO tasks (name, description, points, image_url, user_id) 
+        VALUES (:name, :description, :points, :image_url, :user_id)
+    """)
+    db.session.execute(sql, {"name": name, "description": description, "points": points, "image_url": image_url, "user_id": user_id})
+    db.session.commit()
 
-class Task(db.Model):
+def get_tasks_by_user(user_id):
+    sql = text("SELECT * FROM tasks WHERE user_id = :user_id")
+    result = db.session.execute(sql, {"user_id": user_id})
+    return result.fetchall()
 
-    taskId = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    points = db.Column(db.Integer, nullable=False)
-    image_url = db.Column(db.String(255), default="")
-    user_id = db.Column(db.Integer, db.ForeignKey("user.userId"), nullable=False)
+def delete_task(taskId, user_id):
+    sql = text("DELETE FROM tasks WHERE taskId = :taskId AND user_id = :user_id")
+    db.session.execute(sql, {"taskId": taskId, "user_id": user_id})
+    db.session.commit()
 
-    def __repr__(self):
-        return f"<Task {self.name}>"
+def update_task_by_id(taskId, user_id, name, description, points, image_url):
+    sql = text("""
+        UPDATE tasks
+        SET name = :name, description = :description, points = :points, image_url = :image_url
+        WHERE taskId = :taskId AND user_id = :user_id
+    """)
+    db.session.execute(sql, {
+        "taskId": taskId,
+        "user_id": user_id,
+        "name": name,
+        "description": description,
+        "points": points,
+        "image_url": image_url
+    })
+    db.session.commit()
 
+def get_task_by_id(taskId, user_id):
+    sql = text("SELECT * FROM tasks WHERE taskId = :taskId AND user_id = :user_id")
+    result = db.session.execute(sql, {"taskId": taskId, "user_id": user_id}).fetchone()
+    return result
 
-class TaskProgress(db.Model):
-    __tablename__ = 'task_progress'
+def get_user_by_username(username):
+    """Fetches a user by username."""
+    sql = text("SELECT * FROM users WHERE username = :username")
+    result = db.session.execute(sql, {"username": username}).fetchone()
+    return result
 
-    progressId = db.Column(db.Integer, primary_key=True)
-    taskId = db.Column(db.Integer, db.ForeignKey('task.taskId'), nullable=False)
-    userId = db.Column(db.Integer, db.ForeignKey('user.userId'), nullable=False)
-    status = db.Column(db.String(50), nullable=False)
-
-    task = db.relationship('Task', back_populates='progress')
-    user = db.relationship('User', back_populates='task_progress')
-
-Task.progress = db.relationship('TaskProgress', back_populates='task', cascade='all, delete')
-User.task_progress = db.relationship('TaskProgress', back_populates='user', cascade='all, delete')
+def get_user_by_email(email):
+    """Fetches a user by email."""
+    sql = text("SELECT * FROM users WHERE email = :email")
+    result = db.session.execute(sql, {"email": email}).fetchone()
+    return result

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Tasks</title>
+    <link rel="stylesheet" href="../static/css/style2.css" />
+  </head>
+  <body>
+    <header class="navbar">
+      <h1>
+        Task Tracker
+        <button class="menu-toggle">☰</button>
+      </h1>
+      <ul class="nav-links">
+        <li><a href="{{ url_for('create_task_render') }}">Create Task</a></li>
+        <li><a href="#" id="logout-btn">Logout</a></li>
+      </ul>
+    </header>
+    <main class="container">
+      <section>
+        <h2>My Tasks</h2>
+        <!-- Search Bar -->
+        <div class="search-container">
+          <input type="text" id="search-bar" placeholder="Search tasks..." />
+        </div>
+        <div id="task-list" class="task-list">
+          <!-- js to dynamically load tasks here -->
+        </div>
+      </section>
+    </main>
+    <footer>
+      <p>Task Tracker © 2024. All rights reserved.</p>
+    </footer>
+    <script
+      src="{{ url_for('static', filename='js/script.js') }}"
+      defer
+    ></script>
+  </body>
+</html>

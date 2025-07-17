@@ -4,17 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Task Tracker</title>
-    <link rel="stylesheet" href="/SDP/static/css/style.css" />
+    <link rel="stylesheet" href="../static/css/style.css" />
   </head>
   <body>
     <header class="navbar">
       <h1 id="task-tracker-title">Task Tracker</h1>
+      <button class="menu-toggle">☰</button>
       <ul class="nav-links">
         <li><a href="#features">Features</a></li>
         <li><a href="#testimonials">Testimonials</a></li>
         <li><a href="#pricing">Pricing</a></li>
         <li><a href="#faq">FAQ</a></li>
-        <li><a href="#login">Login</a></li>
+        <li>
+          <a
+            href="{{ url_for('login_register_render') }}"
+            id="login-btn"
+            class="cta primary"
+            >Login</a
+          >
+        </li>
       </ul>
     </header>
     <main>
@@ -24,7 +32,7 @@
           <p id="tagline">
             Track, prioritize, and achieve your goals effortlessly.
           </p>
-          <a href="#features" class="cta primary">Get Started</a>
+          <a href="#" id="start-btn" class="cta primary">Get Started</a>
           <a href="#pricing" class="cta secondary">Learn More</a>
         </div>
       </section>
@@ -32,17 +40,17 @@
         <h2>Features</h2>
         <div class="features-grid">
           <div class="feature-item">
-            <img src="/SDP/static/icons/track.png" alt="Track Tasks" />
+            <img src="../static/icons/track.png" alt="Track Tasks" />
             <h3>Track Tasks</h3>
             <p>Easily monitor your progress and stay organized.</p>
           </div>
           <div class="feature-item">
-            <img src="/SDP/static/icons/prior.png" alt="Prioritize" />
+            <img src="../static/icons/prior.png" alt="Prioritize" />
             <h3>Prioritize</h3>
             <p>Set task priorities to focus on what matters most.</p>
           </div>
           <div class="feature-item">
-            <img src="/SDP/static/icons/team.png" alt="Collaborate" />
+            <img src="../static/icons/team.png" alt="Collaborate" />
             <h3>Collaborate</h3>
             <p>Work together seamlessly with team members.</p>
           </div>
@@ -114,9 +122,29 @@
         </div>
       </section>
     </main>
+    <div id="login-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Login</h2>
+        <form id="loginForm">
+          <label for="email">Email:</label>
+          <input type="email" id="email" required />
+
+          <label for="password">Password:</label>
+          <input type="password" id="password" required />
+
+          <button type="submit" class="cta primary">Login</button>
+          <p id="login-error" class="error-message"></p>
+        </form>
+      </div>
+    </div>
+
     <footer>
       <p>Task Tracker © 2024. All rights reserved.</p>
     </footer>
-    <script src="/SDP/static/js/script.js" defer></script>
+    <script
+      src="{{ url_for('static', filename='js/script.js') }}"
+      defer
+    ></script>
   </body>
 </html>

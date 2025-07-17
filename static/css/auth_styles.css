@@ -1,0 +1,109 @@
+/* Authentication Page Styles */
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  color: #2f3136;
+  line-height: 1.6;
+}
+
+/* Back Button */
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  text-decoration: none;
+  color: #2f80ed;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #f0f0f0;
+  padding: 8px 12px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.back-button:hover {
+  background-color: #d6d6d6;
+}
+
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f7fa;
+}
+
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.auth-box {
+  background: #fff;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 350px;
+}
+
+.auth-box h2 {
+  margin-bottom: 20px;
+  color: #2f80ed;
+}
+
+.auth-box input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.auth-box button {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  background-color: #2f80ed;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.auth-box button:hover {
+  background-color: #2467c9;
+}
+
+.toggle-text {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.toggle-text a {
+  color: #2f80ed;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.toggle-text a:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.hidden {
+  display: none;
+}

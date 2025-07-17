@@ -1,106 +1,130 @@
-from flask import Flask, render_template, request, jsonify, g
+from flask import Flask, request, jsonify, render_template
 from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
-from models import db, Task, User  # Import models
-from werkzeug.security import check_password_hash
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token
+from flask_bcrypt import Bcrypt
+from extensions import db
+from models import initialize_database, create_task, get_tasks_by_user, delete_task, update_task_by_id, get_task_by_id
+from auth import register_user, login_user
+from config import Config
+from flask_cors import CORS
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:Qwerty123456!@127.0.0.1:3306/sdp_project"
-app.config['SECRET_KEY'] = "your_secret_key"
-app.config['JWT_SECRET_KEY'] = "your_jwt_secret_key"
+app = Flask(__name__, static_folder="static")
+app.config.from_object(Config)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-# Initialize database and JWT
 db.init_app(app)
 jwt = JWTManager(app)
 migrate = Migrate(app, db)
+bcrypt = Bcrypt(app)
 
 with app.app_context():
-    db.create_all()
+    initialize_database()
+
+@app.route('/')
+def root_render():
+    return render_template("home.html")
+
+@app.route('/home')
+def home_render():
+    return render_template("home.html")
+
+@app.route("/login_register")
+def login_register_render():
+    return render_template("login_register.html")
+
+@app.route("/index_user")
+def index_user_render():
+    return render_template("index_user.html")
+
+@app.route("/tasks")
+def tasks_render():
+    return render_template("tasks.html")
+
+@app.route("/create_task")
+def create_task_render():
+    return render_template("create_task.html")
 
 
-@app.route('/register', methods=['POST'])
+@app.route("/login", methods=["OPTIONS"])
+def login_preflight():
+    """Handles preflight requests for login"""
+    response = jsonify({"message": "CORS preflight success"})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "Authorization, Content-Type")
+    response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+    return response
+
+@app.route("/register", methods=["POST"])
 def register():
-    """
-    Register a new user.
-    """
     data = request.json
-    if not all(k in data for k in ('username', 'email', 'password')):
-        return jsonify({"error": "Missing required fields"}), 400
+    response, status = register_user(data)
+    return jsonify(response), status
 
-    if User.query.filter_by(email=data['email']).first():
-        return jsonify({"error": "Email already registered"}), 400
-
-    new_user = User(username=data['username'], email=data['email'])
-    new_user.set_password(data['password'])
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify({"message": "User registered successfully"}), 201
-
-
-@app.route('/login', methods=['POST'])
+@app.route("/login", methods=["POST"])
 def login():
-    """
-    Authenticate a user and issue a JWT token.
-    """
     data = request.json
-    user = User.query.filter_by(email=data['email']).first()
-    if not user or not user.check_password(data['password']):
-        return jsonify({"error": "Invalid email or password"}), 401
+    response, status = login_user(data)
+    return jsonify(response), status
 
-    access_token = create_access_token(identity=user.userId)
-    return jsonify({"message": "Login successful", "access_token": access_token}), 200
-
-
-@app.route('/tasks', methods=['POST'])
+@app.route("/api/tasks/create", methods=["POST"])
 @jwt_required()
-def create_task():
-    """
-    Create a new task.
-    """
+def create_task_api():
     user_id = get_jwt_identity()
     data = request.json
-
-    if not all(k in data for k in ('name', 'description', 'points')):
+    if not all(k in data for k in ("name", "description", "points")):
         return jsonify({"error": "Missing required fields"}), 400
 
-    new_task = Task(
-        name=data['name'],
-        description=data['description'],
-        points=data['points'],
-        image_url=data.get('image_url', ''),
-        user_id=user_id
-    )
-    db.session.add(new_task)
-    db.session.commit()
-    return jsonify({"taskId": new_task.taskId, **data}), 201
+    create_task(data["name"], data["description"], data["points"], data.get("image_url", ""), user_id)
+    return jsonify({"message": "Task created successfully"}), 201
 
-
-@app.route('/tasks', methods=['GET'])
+@app.route("/api/tasks", methods=["GET"])
 @jwt_required()
-def get_all_tasks():
-    """
-    Retrieve all tasks for the logged-in user.
-    """
+def get_all_tasks_api():
     user_id = get_jwt_identity()
-    tasks = Task.query.filter_by(user_id=user_id).all()
-    return jsonify([{
-        "taskId": task.taskId,
-        "name": task.name,
-        "description": task.description,
-        "points": task.points,
-        "image_url": task.image_url
-    } for task in tasks]), 200
+    tasks = get_tasks_by_user(user_id)  
 
+    task_list = []
+    for task in tasks:
+        task_dict = {
+            "taskId": task.taskId,
+            "name": task.name,
+            "description": task.description,
+            "points": task.points,
+            "image_url": task.image_url
+        }
+        task_list.append(task_dict)
 
-@app.route('/tasks/<int:taskId>', methods=['GET'])
+    return jsonify(task_list), 200
+
+@app.route("/api/tasks/<int:taskId>", methods=["DELETE"])
+@jwt_required()
+def delete_task_api(taskId):
+    user_id = get_jwt_identity()
+    delete_task(taskId, user_id)
+    return jsonify({"message": "Task deleted successfully"}), 200
+
+@app.route("/api/tasks/<int:taskId>", methods=["PUT"])
+@jwt_required()
+def update_task_api(taskId):
+    user_id = get_jwt_identity()
+    data = request.json
+
+    required_fields = ["name", "description", "points"]
+    missing_fields = [field for field in required_fields if field not in data]
+    if missing_fields:
+        return jsonify({"error": f"Missing required fields: {', '.join(missing_fields)}"}), 400
+
+    update_task_by_id(taskId, user_id, data["name"], data["description"], data["points"], data.get("image_url", ""))
+
+    return jsonify({"message": "Task updated successfully"}), 200
+
+@app.route("/api/tasks/<int:taskId>", methods=["GET"])
 @jwt_required()
 def get_task(taskId):
-    """
-    Retrieve a specific task by taskId for the logged-in user.
-    """
-    user_id = get_jwt_identity()
-    task = Task.query.filter_by(taskId=taskId, user_id=user_id).first()
+    """Retrieve a specific task by taskId."""
+    user_id = get_jwt_identity()  # Get user ID from JWT
+    task = get_task_by_id(taskId, user_id)  # Fetch task from database
+
     if not task:
         return jsonify({"error": "Task not found"}), 404
 
@@ -112,48 +136,20 @@ def get_task(taskId):
         "image_url": task.image_url
     }), 200
 
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({"error": "Resource not found"}), 404
 
-@app.route('/tasks/<int:taskId>', methods=['DELETE'])
-@jwt_required()
-def delete_task(taskId):
-    """
-    Delete a task by taskId for the logged-in user.
-    """
-    user_id = get_jwt_identity()
-    task = Task.query.filter_by(taskId=taskId, user_id=user_id).first()
-    if not task:
-        return jsonify({"error": "Task not found"}), 404
-
-    db.session.delete(task)
-    db.session.commit()
-    return jsonify({"message": "Task deleted successfully"}), 200
-
-
-@app.route('/tasks/<int:taskId>', methods=['PUT'])
-@jwt_required()
-def update_task(taskId):
-    """
-    Update an existing task for the logged-in user.
-    """
-    user_id = get_jwt_identity()
-    data = request.json
-
-    task = Task.query.filter_by(taskId=taskId, user_id=user_id).first()
-    if not task:
-        return jsonify({"error": "Task not found"}), 404
-
-    required_fields = ['name', 'description', 'points']
-    missing_fields = [field for field in required_fields if field not in data]
-    if missing_fields:
-        return jsonify({"error": f"Missing required fields: {', '.join(missing_fields)}"}), 400
-
-    for key in ['name', 'description', 'points', 'image_url']:
-        if key in data:
-            setattr(task, key, data[key])
-
-    db.session.commit()
-    return jsonify({"message": "Task updated successfully", "taskId": taskId}), 200
-
-
+@app.errorhandler(405)
+def method_not_allowed(error):
+    return jsonify({"error": "Method not allowed"}), 405
 if __name__ == "__main__":
     app.run(debug=True)
+
+@app.after_request
+def apply_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
+    return response

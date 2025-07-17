@@ -3,66 +3,89 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Create Task</title>
-    <link rel="stylesheet" href="/SDP/static/css/style.css" />
+    <title id="page-title">Create Task</title>
+    <link rel="stylesheet" href="../static/css/create_task_styles.css" />
   </head>
   <body>
     <header class="navbar">
-      <h1 id="task-tracker-title">Task Tracker</h1>
+      <h1>
+        Task Tracker
+        <button class="menu-toggle">☰</button>
+      </h1>
       <ul class="nav-links">
-        <li><a href="/home.html">Home</a></li>
-        <li><a href="#features">Features</a></li>
-        <li><a href="#pricing">Pricing</a></li>
-        <li><a href="#faq">FAQ</a></li>
+        <li><a href="{{ url_for('tasks_render') }}">View All Tasks</a></li>
+        <li><a href="#" id="logout-btn">Logout</a></li>
       </ul>
     </header>
-    <main>
-      <section class="hero">
-        <div class="hero-content">
-          <h1>Create a New Task</h1>
-          <p>Define and organize your tasks effectively.</p>
+
+    <main class="container">
+      <section class="create-task">
+        <h2 id="form-title">Create a New Task</h2>
+        <div class="task-form-container">
+          <form id="task-form">
+            <input type="hidden" id="task-id" />
+
+            <div class="form-group">
+              <label for="task-name">Task Name</label>
+              <input
+                type="text"
+                id="task-name"
+                name="name"
+                placeholder="Enter task name"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="description">Description</label>
+              <textarea
+                id="description"
+                name="description"
+                placeholder="Describe the task"
+                required
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="points"
+                >Task Progress: <span id="points-value">50</span>%</label
+              >
+              <input
+                type="range"
+                id="points"
+                name="points"
+                min="0"
+                max="100"
+                value="50"
+                class="slider"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="image-url">Image URL (Optional)</label>
+              <input
+                type="url"
+                id="image-url"
+                name="image_url"
+                placeholder="Enter image URL"
+              />
+            </div>
+
+            <button type="submit" class="cta primary" id="submit-btn">
+              Create Task
+            </button>
+          </form>
         </div>
       </section>
-      <section class="form-section">
-        <h2>Task Details</h2>
-        <form id="create-task-form" action="/tasks" method="POST">
-          <label for="task-name">Task Name:</label>
-          <input
-            type="text"
-            id="task-name"
-            name="name"
-            placeholder="Enter task name"
-            required
-          />
-          <label for="description">Description:</label>
-          <textarea
-            id="description"
-            name="description"
-            placeholder="Enter task description"
-            required
-          ></textarea>
-          <label for="points">Points:</label>
-          <input
-            type="number"
-            id="points"
-            name="points"
-            placeholder="Assign points"
-            required
-          />
-          <label for="image-url">Image URL (Optional):</label>
-          <input
-            type="url"
-            id="image-url"
-            name="image_url"
-            placeholder="Enter image URL"
-          />
-          <button type="submit" class="cta primary">Create Task</button>
-        </form>
-      </section>
     </main>
+
     <footer>
       <p>Task Tracker © 2024. All rights reserved.</p>
     </footer>
-    <script src="/SDP/static/js/script.js" defer></script>
+
+    <script
+      src="{{ url_for('static', filename='js/create_task.js') }}"
+      defer
+    ></script>
   </body>
 </html>
